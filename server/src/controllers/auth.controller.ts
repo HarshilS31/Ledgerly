@@ -2,10 +2,9 @@ import { Request, Response } from "express"
 import bcrypt from "bcryptjs"
 import { UserModel } from "../models/user.model.js"
 import jwt from "jsonwebtoken"
-export const registerUser = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+import "../config/env.js"
+
+export const registerUser = async (req: Request,res: Response): Promise<Response> => {
   try {
     const { username, email, password } = req.body
     if (!username || !email || !password) {
@@ -14,6 +13,13 @@ export const registerUser = async (
         message: "All fields are required."
       })
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid email format."
+        });
+      }
     const existingUser = await UserModel.findOne({
       $or: [{ username }, { email }]
     })
@@ -65,6 +71,16 @@ export const registerUser = async (
 export const loginUser = async (req: Request, res: Response) => {
     try {
         const {email, password } = req.body;
+        if(!email || !password) {
+          return res.status(400).json({message:"Incomplete credentials"})
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+              return res.status(400).json({
+                success: false,
+                message: "Invalid email format."
+          });
+        }
         const existingUser = await UserModel.findOne({
             $or: [{ email }]
         });

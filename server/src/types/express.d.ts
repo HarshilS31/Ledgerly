@@ -1,11 +1,7 @@
-interface userPayload {    
-    id:string
-}
-declare global {
-    namespace express {
-        interface Request {
-            user: userPayload;
-        }
-    }
+import type { userPayload } from "./interfaces.js";
 
+declare module "express-serve-static-core" {
+    interface Request {
+        user?: userPayload;
+    }
 }

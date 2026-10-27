@@ -6,7 +6,7 @@ const taskSchema = new Schema(
     noteId: { type: Schema.Types.ObjectId, ref: "Note", required: true },
     text: { type: String, required: true, trim: true },
     owner: { type: String, default: null },
-    dueDate: { type: Date, default: null },
+    dueText: { type: String, default: null },
     status: { type: String, enum: ["todo", "done"], default: "todo" },
     unclear: { type: Boolean, default: false },
     sourceSnippet: { type: String, default: null },
