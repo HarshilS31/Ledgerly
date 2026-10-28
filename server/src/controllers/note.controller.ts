@@ -80,3 +80,38 @@ export const deleteNote = async(req:Request,res:Response)=> {
         return res.status(500).json({message:"Internal Server Error",err})
     }
 }
+export const updateTask = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user?.id;
+        const taskId = req.params.id; 
+        const { text, dueText, unclear } = req.body;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        const updatePayload: any = {};
+        if (text !== undefined) updatePayload.text = text;
+        if (dueText !== undefined) updatePayload.dueText = dueText; 
+        if (unclear !== undefined) updatePayload.unclear = unclear;
+        if (Object.keys(updatePayload).length === 0) {
+          return res.status(400).json({ message: "At least one field is required to update" });
+         }
+        const updatedTask = await TaskModel.findOneAndUpdate(
+            { _id: taskId, userId: userId },
+            { $set: updatePayload },   
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedTask) {
+            return res.status(404).json({ message: "Task not found or unauthorized" });
+        }
+
+        return res.status(200).json({
+            message: "Task updated successfully",
+            task: updatedTask
+        });
+
+    } catch (err) {
+        console.error("Error updating task:", err);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};

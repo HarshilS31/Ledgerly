@@ -3,9 +3,8 @@ import { Schema, model, type InferSchemaType } from "mongoose";
 const noteSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    title: { type: String, trim: true, maxlength: 120 },
+    title: { type: String, trim: true, maxlength: 120,default:null},
     rawText: { type: String, required: true, maxlength: 20000 },
-    status: { type: String, enum: ["processing", "done", "failed"], default: "processing" },
   },
   { timestamps: true }
 );
