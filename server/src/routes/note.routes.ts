@@ -5,5 +5,5 @@ const router = Router()
 router.post("/create",authenticate,createNote)
 router.get("/getMyNotes",authenticate,getNotesWithTasks)
 router.delete("/:id",authenticate,deleteNote)
-router.put("updateTask/:taskId",authenticate,updateTask)
+router.put("/updateTask/:taskId",authenticate,updateTask)
 export default router
