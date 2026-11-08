@@ -25,9 +25,22 @@ export interface Note {
     userId: string;
     title: string;
     rawText: string;
-    status: string;
-    tasks?: Task[];
+    tasks: Task[];
     createdAt: string;
     updatedAt: string;
 }
 export type TaskPatch = Pick<Task, "text" | "owner" | "dueText">
+export interface NotePayload {
+    title:String,
+    rawText:String
+}
+export interface NoteResponse {
+    message: string;
+    count:number
+    data: Note[];
+}
+export interface TaskPayload {
+    text: string;
+    owner: string | null;
+    dueText: string | null;
+}

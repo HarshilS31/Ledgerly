@@ -4,7 +4,7 @@ import Login from "./pages/Login"
 import Register from "./pages/Register"
 import MyNotes from "./pages/MyNotes"
 import NewNote from "./pages/NewNote"
-import SettingsPage from "./pages/SettingsPage"
+import Settings from "./pages/Settings"
 import { AuthProvider } from "./context/AuthContext"
 import RootLayout from "./layouts/RootLayout"
 import PageNotFound from "./pages/PageNotFound"
@@ -20,7 +20,7 @@ const noteRouter = createBrowserRouter(
       <Route element={<ProtectedRoute/>}>
         <Route path="/new-note" element={<NewNote />}/>
         <Route path="/my-notes" element={<MyNotes />}/>
-        <Route path="/settings" element={<SettingsPage />}/>
+        <Route path="/settings" element={<Settings />}/>
         <Route path="/" element={<NewNote />}/>
       </Route>
     </Route>

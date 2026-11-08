@@ -1,15 +1,25 @@
-import {NavLink} from "react-router-dom"
+import {NavLink, replace} from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import {logoutUser} from "../api/auth"
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import ConfirmDialog from "./ConfirmDialog";
 export default function Sidebar() { 
     const navigate = useNavigate();
+    const {user,logout} = useAuth()
+const [confirmOpen, setConfirmOpen] = useState(false);
+const [loggingOut, setLoggingOut] = useState(false);
 
-    const handleLogout = () => {
-        logoutUser().catch((err) => console.error("Logout failed:", err));
-        navigate("/login");
+const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+        await logout();
+        navigate("/login", { replace: true });
+    } finally {
+        setLoggingOut(false);
+        setConfirmOpen(false);
     }
-    const {user} = useAuth()
+};
     return (
         <aside className="glass-panel flex h-full w-64 shrink-0 flex-col p-5">
             <div className="mb-6 flex items-center justify-between">
@@ -18,9 +28,6 @@ export default function Sidebar() {
                     <span className="text-xl font-extrabold text-ink">Ledgerly</span>
                 </div>
             </div>
-            <p className="mb-2 px-1 text-[11px] font-extrabold uppercase tracking-wider text-ink-faint">
-                Navigation
-            </p>
             <nav className="space-y-1">
                 <NavLink
                     to="/new-note"
@@ -49,9 +56,17 @@ export default function Sidebar() {
                     <span className="orb orb-orange h-8 w-8" />
                     <span className="truncate text-sm font-bold text-ink">{user?.username}</span>
                 </div>
-                <button className="text-xs font-bold text-ink-soft transition-colors hover:text-red-600" onClick={()=> handleLogout()}>
-                    Logout
-                </button>
+                <button onClick={() => setConfirmOpen(true)} className="text-xs font-bold text-ink-soft transition-colors hover:text-red-600">Logout</button>
+                <ConfirmDialog
+                    open={confirmOpen}
+                    title="Log out of Ledgerly?"
+                    message="You'll need to sign in again to see your notes."
+                    confirmLabel="Log out"
+                    loading={loggingOut}
+                    onConfirm={handleLogout}
+                    onCancel={() => setConfirmOpen(false)}
+                />
+                
 
             </div>
         </aside>

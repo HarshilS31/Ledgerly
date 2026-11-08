@@ -122,3 +122,34 @@ export const logoutUser = (req: Request, res: Response) => {
     });
     return res.status(200).json({ message: "Logout successful" });
 }
+export const changePassword = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+        const { currentPassword, newPassword } = req.body;
+        if (typeof currentPassword !== "string" || typeof newPassword !== "string") {
+            return res.status(400).json({ message: "Both passwords are required." });
+        }
+        if (newPassword.length < 8) {
+            return res.status(400).json({ message: "New password must be at least 8 characters." });
+        }
+        const user = await UserModel.findById(userId).select("+password");
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        const ok = await bcrypt.compare(currentPassword, user.password);
+        if (!ok) return res.status(400).json({ message: "Current password is incorrect." });
+
+        if (await bcrypt.compare(newPassword, user.password)) {
+            return res.status(400).json({ message: "New password must be different from the current one." });
+        }
+
+        user.password = await bcrypt.hash(newPassword,10);
+        await user.save();
+
+        return res.status(200).json({ message: "Password updated." });
+    } catch (err) {
+        console.error("Error changing password:", err);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}

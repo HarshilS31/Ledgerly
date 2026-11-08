@@ -1,15 +1,14 @@
 import { useState } from "react";
-import { Pencil, Check, X, AlertTriangle } from "lucide-react";
+import { Pencil, Check, X, AlertTriangle, Trash2 } from "lucide-react";
 import { Spinner } from "./Spinner";
 import type { Task, TaskPatch } from "../types/interfaces";
-
 type Props = {
     task: Task;
     onToggle?: (task: Task) => void;
     onSave?: (id: string, patch: TaskPatch) => void | Promise<void>;
-};
-
-export default function TaskCard({ task, onToggle, onSave }: Props) {
+    onDelete?: (task: Task) => void;
+}
+export default function TaskCard({ task, onToggle, onSave, onDelete }: Props) {
     const [editing, setEditing] = useState(false);
     const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState("");
@@ -18,13 +17,18 @@ export default function TaskCard({ task, onToggle, onSave }: Props) {
         owner: task.owner ?? "",
         dueText: task.dueText ?? "",
     });
-    const isMine = task.owner?.trim().toLowerCase()==="me"
-    const meta = [isMine ? null : task.owner ?? "Unassigned", task.dueText].filter(Boolean).join(" · ")
+
+    const isMine = task.owner?.trim().toLowerCase() === "me";
+    const meta = [isMine ? null : task.owner ?? "Unassigned", task.dueText]
+        .filter(Boolean)
+        .join(" · ");
+
     const startEdit = () => {
         setDraft({ text: task.text, owner: task.owner ?? "", dueText: task.dueText ?? "" });
         setSaveError("");
         setEditing(true);
     };
+
     const cancel = () => {
         if (saving) return;
         setSaveError("");
@@ -132,9 +136,9 @@ export default function TaskCard({ task, onToggle, onSave }: Props) {
                         <p className={`text-sm font-extrabold text-ink ${done ? "line-through opacity-60" : ""}`}>
                             {task.text}
                         </p>
-                        <p className="mt-0.5 text-xs font-semibold text-ink-soft">
+
                         {meta && <p className="mt-0.5 text-xs font-semibold text-ink-soft">{meta}</p>}
-                        </p>
+
                         {task.unclear && (
                             <div className="mt-2 space-y-1">
                                 <span className="inline-flex items-center gap-1 rounded-full border border-yellow-400 bg-yellow-200 px-2 py-0.5 text-[11px] font-bold text-yellow-900">
@@ -158,6 +162,18 @@ export default function TaskCard({ task, onToggle, onSave }: Props) {
                         >
                             <Pencil size={16} />
                         </button>
+
+                        {onDelete && (
+                            <button
+                                type="button"
+                                onClick={() => onDelete(task)}
+                                aria-label="Delete task"
+                                className="rounded-lg p-1 text-ink-soft transition-colors hover:bg-white/60 hover:text-red-600"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        )}
+
                         <input
                             type="checkbox"
                             checked={done}
@@ -169,5 +185,5 @@ export default function TaskCard({ task, onToggle, onSave }: Props) {
                 </>
             )}
         </div>
-    );
+    )
 }

@@ -5,7 +5,6 @@ import {TaskModel} from "../models/task.model.js"
 import { UserModel } from "../models/user.model.js"
 import { generateAndMapTasks } from "../services/ai.service.js"
 import mongoose from "mongoose"
-import { ResponseFormat } from "@google/genai"
 export const createNote = async(req:Request,res:Response)=> {
     try{
         const userId = req.user?.id;
@@ -69,8 +68,13 @@ export const deleteNote = async(req:Request,res:Response)=> {
             return res.status(401).json({message:"Unauthorized"})
         }
         const noteId = req.params.id;
-        const deletedNote = await NoteModel.findOneAndDelete({_id:noteId,userId:userId})
+        if(!mongoose.isValidObjectId(noteId)) {
+            return res.status(404).json({message:"Note not found"})
+        }
+        const note = await NoteModel.findOne({ _id: noteId, userId });
+        if (!note) return res.status(404).json({ message: "Note not found" });
         await TaskModel.deleteMany({ noteId: noteId });
+        const deletedNote = await NoteModel.findOneAndDelete({_id:noteId,userId:userId})
         if(!deletedNote) {
             return res.status(404).json({message:"Note not found"})
         }
@@ -83,7 +87,7 @@ export const deleteNote = async(req:Request,res:Response)=> {
 export const updateTask = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id;
-        const taskId = req.params.taskId; // matches router.put("/updateTask/:taskId")
+        const taskId = req.params.taskId; 
         if (!userId) return res.status(401).json({ message: "Unauthorized" });
         const { text, dueText, owner, status } = req.body;
         const updatePayload: Record<string, unknown> = {};
@@ -127,4 +131,60 @@ export const updateTask = async (req: Request, res: Response) => {
         console.error("Error updating task:", err);
         return res.status(500).json({ message: "Internal Server Error" });
     }
-};
+}
+export const addTask = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user?.id
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const noteId = req.params.id;
+        const {text,owner,dueText} = req.body
+         if (typeof text !== "string" || !text.trim()) {
+            return res.status(400).json({ message: "Task text can't be empty" });
+        }
+
+        const note = await NoteModel.findOne({ _id: noteId, userId });
+        if (!note) {
+            return res.status(404).json({ message: "Note not found" });
+        }
+        if (!mongoose.isValidObjectId(noteId)) {
+            return res.status(404).json({ message: "Note not found" });
+        }
+        const task = await TaskModel.create({
+            userId,
+            noteId: note._id,
+            text: text.trim(),
+            owner: typeof owner === "string" && owner.trim() ? owner.trim() : null,
+            dueText: typeof dueText === "string" && dueText.trim() ? dueText.trim() : null,
+            status: "todo",
+            unclear: false
+        });
+
+        return res.status(201).json({ message: "Task added successfully", task });
+    } catch (err) {
+        console.error("Error adding task:", err);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+export const deleteTask = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user?.id
+        const taskId = req.params.taskId;
+        if (!userId) { 
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        if (!mongoose.isValidObjectId(taskId)) {
+            return res.status(404).json({ message: "Task not found" });
+        }
+        const deletedTask = await TaskModel.findOneAndDelete({ _id: taskId })
+        if(!deletedTask) {
+            return res.status(404).json({message:" Task not found "})
+        }
+        return res.status(200).json({ message: "Task deleted successfully" });
+    }catch (err) {
+        console.error("Error deleting task:", err);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}

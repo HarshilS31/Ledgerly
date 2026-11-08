@@ -21,3 +21,10 @@ export const logoutUser = async() => {
     const resp = await api.post('/auth/logout')
     return resp.data
 }
+export const getCurrentUser = async () => {
+    const resp = await api.get('/me');
+    return resp.data;
+}
+export const change_Password = async (currentPassword:string,newPassword:string) : Promise<void> => {
+    await api.put("/auth/change-password", { currentPassword, newPassword })
+}
