@@ -28,3 +28,9 @@ export const getCurrentUser = async () => {
 export const change_Password = async (currentPassword:string,newPassword:string) : Promise<void> => {
     await api.put("/auth/change-password", { currentPassword, newPassword })
 }
+export const forgotPassword = async (email: string): Promise<void> => {
+    await api.post("/auth/forgot-password", { email });
+};
+export const resetPasswordRequest = async (token:string,newPassword:string) : Promise<void> => {
+    await api.post("/auth/reset-password",{token,newPassword});
+}

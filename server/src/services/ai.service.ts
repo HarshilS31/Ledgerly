@@ -1,6 +1,6 @@
-import { GoogleGenAI } from "@google/genai";
-import { z } from "zod";
-import mongoose from "mongoose";
+import { GoogleGenAI } from "@google/genai"
+import { z } from "zod"
+import mongoose from "mongoose"
 const taskExtractionZod = z.object({
   tasks: z.array(
     z.object({
@@ -58,25 +58,43 @@ export type RawExtractedTask = z.infer<typeof taskExtractionZod>["tasks"][number
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function generateAndMapTasks( rawText: string, userId: mongoose.Types.ObjectId, noteId: mongoose.Types.ObjectId) {
-  const response = await ai.models.generateContent({
-    model: "gemini-3.6-flash",
-    contents: `Extract action items from this text: "${rawText}"`,
-        config: {
-          systemInstruction: systemPrompt,
-      responseMimeType: "application/json",
-      responseJsonSchema: z.toJSONSchema(taskExtractionZod), 
-      temperature: 0.1, 
-    },
-  });
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3.6-flash",
+      contents: `Extract action items from this text: "${rawText}"`,
+          config: {
+            systemInstruction: systemPrompt,
+        responseMimeType: "application/json",
+        responseJsonSchema: z.toJSONSchema(taskExtractionZod), 
+        temperature: 0.1, 
+      },
+    });
 
-  if (!response.text) throw new Error("AI returned empty response");
+    if (!response.text) throw new Error("AI returned empty response");
 
-  const parsedData = taskExtractionZod.parse(JSON.parse(response.text));
-  const finalizedTasks = parsedData.tasks.map((task: RawExtractedTask) => ({
-      ...task,       
-      userId,        
-      noteId         
-  }))
+    const parsedData = taskExtractionZod.parse(JSON.parse(response.text));
+    const finalizedTasks = parsedData.tasks.map((task: RawExtractedTask) => ({
+        ...task,       
+        userId,        
+        noteId         
+    }))
 
-  return finalizedTasks;
+    return finalizedTasks;
+  } catch (err: any) {
+    console.error("generateAndMapTasks failed:", err);
+
+    const status = err?.status ?? err?.code ?? err?.response?.status;
+    const fail = (httpStatus: number, message: string) => {
+      const e: any = new Error(message)
+      e.status = httpStatus
+      return e
+    }
+    if (status === 503 || status === 429) {
+      throw fail(503, "The AI service is busy right now. Please try again in a minute.");
+    }
+    if (err instanceof z.ZodError || err instanceof SyntaxError) {
+      throw fail(502, "Couldn't understand the AI's response. Please try again.");
+    }
+    throw fail(502, "Couldn't extract tasks right now. Please try again.");
+  }
 }

@@ -24,6 +24,7 @@ const aiLimiter = rateLimit({
     max: 20,
     message: { message: "AI generation limit reached. Please try again later." }
 })
+
 app.use("/api/notes", aiLimiter);
 app.use(express.urlencoded({extended:true}))
 app.use("/ledgerly/auth",authRouter)

@@ -9,9 +9,11 @@ import { AuthProvider } from "./context/AuthContext"
 import RootLayout from "./layouts/RootLayout"
 import PageNotFound from "./pages/PageNotFound"
 import PublicRoute from "./components/PublicRoute"
+import ForgotPassword from "./components/ForgotPassword"
 const noteRouter = createBrowserRouter(
   createRoutesFromElements(
     <>
+    <Route path="/forgot-password" element={<ForgotPassword/>} />
     <Route element={<PublicRoute/>}>
       <Route path="/login" element={<Login />}/>
       <Route path="/register" element={<Register />}/>

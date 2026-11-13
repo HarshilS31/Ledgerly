@@ -3,7 +3,9 @@ import bcrypt from "bcryptjs"
 import { UserModel } from "../models/user.model.js"
 import jwt from "jsonwebtoken"
 import "../config/env.js"
-
+import crypto from "crypto"
+import { sendResetEmail } from "../utils/mailer.js"
+import { error } from "console"
 export const registerUser = async (req: Request,res: Response): Promise<Response> => {
   try {
     const { username, email, password } = req.body
@@ -26,7 +28,7 @@ export const registerUser = async (req: Request,res: Response): Promise<Response
     if (existingUser) {
       return res.status(409).json({
         success: false,
-        message: "User already exists."
+        message: "This username or email already exists."
       })
     }
     const hashedPassword = await bcrypt.hash(password, 10)
@@ -152,4 +154,60 @@ export const changePassword = async (req: Request, res: Response) => {
         console.error("Error changing password:", err);
         return res.status(500).json({ message: "Internal Server Error" });
     }
+}
+const sha256 = (s: string) => crypto.createHash("sha256").update(s).digest("hex");
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    if (!email) return res.status(400).json({ message: "Email is required." });
+
+    const user = await UserModel.findOne({ email });
+
+    if (user) {
+      const token = crypto.randomBytes(32).toString("hex"); 
+      await UserModel.updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            passwordResetTokenHash: sha256(token),                        
+            passwordResetExpires: new Date(Date.now() + 15 * 60 * 1000),  
+          },
+        }
+      );
+      const link = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
+      const info = await sendResetEmail(user.email, link).catch((e) => console.error("Reset email failed:", e))
+    }
+    return res.json({ message: "If that email is registered, we've sent a reset link." });
+  } catch (err) {
+    console.error("forgotPassword error:", err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+export const resetPassword = async (req:Request,res:Response) => {
+  try{
+    const {token,newPassword} = req.body
+    if(!token || typeof token!=="string") {
+      return res.status(400).json({message:"This reset link is invalid or has expired."})
+    }
+    if(typeof newPassword!="string" || newPassword.length<8) {
+      return res.status(400).json({message:"Password must be at least 8 characters."})
+    }
+    const user = await UserModel.findOne({
+      passwordResetTokenHash:sha256(token),
+      passwordResetExpires:{$gt: new Date()}
+    })
+    if(!user) {
+      return res.status(400).json({message:"This reset link is invalid or has expired."})
+    }
+    const hashed = await bcrypt.hash(newPassword,10);
+    await UserModel.updateOne({_id:user._id},{
+      $set:{password:hashed},
+      $unset: { passwordResetTokenHash: "", passwordResetExpires: "" }
+    })
+     return res.json({ message: "Password updated. You can now sign in." });
+  }catch(err:any) {
+    console.log(err?.message)
+    return res.status(500).json({message:"Failed to reset Password",err})
+  }
 }

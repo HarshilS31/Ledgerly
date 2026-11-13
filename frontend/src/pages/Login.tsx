@@ -87,6 +87,11 @@ export default function Login() {
                             placeholder="••••••••"
                         />
                         </div>
+                        <div className="text-right">
+                            <Link to="/forgot-password" className="text-sm font-bold text-aqua-600 transition-colors hover:text-aqua-500">
+                                Forgot password?
+                            </Link>
+                        </div>
                     </div>
 
                     <button type="submit" disabled={isLoading} className="btn-gloss flex w-full justify-center disabled:cursor-not-allowed disabled:opacity-50"
