@@ -1,7 +1,6 @@
-import {type Note,type Task} from "../types/interfaces"
 import { api } from "./axios"
-import { type NotePayload,type NoteResponse,type TaskPayload } from "../types/interfaces";
-export const createNote = async (payload:NotePayload):Promise<NoteResponse> => {
+import { type NotePayload,type NoteResponse,type TaskPayload,type Note,type Task, type CreateNoteResponse } from "../types/interfaces";
+export const createNote = async (payload:NotePayload):Promise<CreateNoteResponse>=> {
     const response = await api.post('/note/create',payload);
     return response.data
 }

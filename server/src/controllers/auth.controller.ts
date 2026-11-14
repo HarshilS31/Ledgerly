@@ -5,8 +5,6 @@ import jwt from "jsonwebtoken"
 import "../config/env.js"
 import crypto from "crypto"
 import { sendResetEmail } from "../utils/mailer.js"
-import { error } from "console"
-import { cookieOptions } from "../utils/cookie.js"
 export const registerUser = async (req: Request,res: Response): Promise<Response> => {
   try {
     const { username, email, password } = req.body

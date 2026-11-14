@@ -34,10 +34,14 @@ export interface NotePayload {
     title:String,
     rawText:String
 }
+export interface CreateNoteResponse {
+    note: Note;
+    tasks: Task[];
+}
 export interface NoteResponse {
     message: string;
     count:number
-    data: Note[];
+    data: Note[],
 }
 export interface TaskPayload {
     text: string;

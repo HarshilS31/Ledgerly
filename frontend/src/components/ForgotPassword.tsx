@@ -1,31 +1,6 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
-import { Spinner } from "../components/Spinner";
-import { forgotPassword } from "../api/auth"; // apne path ke hisaab se
-
 export default function ForgotPassword() {
-    const [email, setEmail] = useState("");
-    const [sent, setSent] = useState(false);
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (loading || !email.trim()) return;
-
-        setError("");
-        setLoading(true);
-        try {
-            await forgotPassword(email.trim());
-            setSent(true);
-        } catch (err: any) {
-            setError(err?.response?.data?.message || "Something went wrong. Try again.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
     return (
         <AuthLayout>
             <div className="glass-panel relative w-full max-w-md space-y-6 overflow-hidden p-8">
