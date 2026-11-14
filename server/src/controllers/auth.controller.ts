@@ -6,6 +6,7 @@ import "../config/env.js"
 import crypto from "crypto"
 import { sendResetEmail } from "../utils/mailer.js"
 import { error } from "console"
+import { cookieOptions } from "../utils/cookie.js"
 export const registerUser = async (req: Request,res: Response): Promise<Response> => {
   try {
     const { username, email, password } = req.body
@@ -47,12 +48,7 @@ export const registerUser = async (req: Request,res: Response): Promise<Response
         expiresIn: "7d"
       }
     )
-    res.cookie("token",token,{
-        httpOnly:true,
-        secure:false,
-        sameSite:"strict",
-        maxAge:7*24*60*60*1000 
-    })
+    res.cookie("token",token,cookieOptions)
     return res.status(201).json({
       success: true,
       message: "User registered successfully.",
@@ -98,12 +94,7 @@ export const loginUser = async (req: Request, res: Response) => {
             process.env.JWT_SECRET as string,
             { expiresIn: "7d" }
         );
-        res.cookie("token",token, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "strict",
-            maxAge: 24*60*60*7*1000
-        });
+        res.cookie("token",token,cookieOptions);
         return res.status(200).json({
             message: "Login successful",
             user: {
