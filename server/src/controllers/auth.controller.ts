@@ -48,7 +48,13 @@ export const registerUser = async (req: Request,res: Response): Promise<Response
         expiresIn: "7d"
       }
     )
-    res.cookie("token", token, cookieOptions)
+    res.cookie("token",token,{
+      httpOnly: true,
+      secure:true,
+      sameSite:"none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
+
     return res.status(201).json({
       success: true,
       message: "User registered successfully.",
@@ -94,7 +100,12 @@ export const loginUser = async (req: Request, res: Response) => {
             process.env.JWT_SECRET as string,
             { expiresIn: "7d" }
         );
-        res.cookie("token",token,cookieOptions);
+        res.cookie("token",token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            maxAge: 24*60*60*7*1000
+        });
         return res.status(200).json({
             message: "Login successful",
             user: {
@@ -108,7 +119,11 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 }
 export const logoutUser = (req: Request, res: Response) => {
-    res.clearCookie("token", cookieOptions);
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none"
+    });
     return res.status(200).json({ message: "Logout successful" });
 }
 export const changePassword = async (req: Request, res: Response) => {
