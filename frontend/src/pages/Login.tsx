@@ -22,7 +22,7 @@ export default function Login() {
         try {
             await loginUser({ email, password });
             await checkAuth();
-            navigate("/dashboard");
+            navigate("/new-note", { replace: true });
         } catch (err: any) {
             const message = err.response?.data?.message || "Failed to connect to server";
             setError(message);

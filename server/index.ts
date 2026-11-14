@@ -14,13 +14,5 @@ try{
 })
 }catch(error) {
     console.error(error)
+    process.exit(1)
 }
-// const testEmail = async () => {
-//     try {
-//         await sendResetEmail("harshils3107@gmail.com","http://localhost:5173/reset-password?token=test")
-//         console.log("E-mail sent ")
-//     }catch(err:any) {
-//         console.log("E-mail failed",err.message)
-//     }
-// }
-// testEmail()

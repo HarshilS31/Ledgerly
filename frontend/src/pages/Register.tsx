@@ -24,7 +24,7 @@ export default function Register() {
         try {
             await registerUser({ username, email, password });
             await checkAuth();
-            navigate("/dashboard");
+            navigate("/new-note", { replace: true });
         } catch (err: any) {
             const message = err.response?.data?.message || "Failed to create account";
             setError(message);

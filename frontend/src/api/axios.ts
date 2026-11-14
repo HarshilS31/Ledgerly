@@ -1,6 +1,7 @@
 import axios from "axios"
+console.log("API URL:", import.meta.env.VITE_API_URL);
 export const api = axios.create({
-    baseURL: "http://localhost:8080/ledgerly", 
+    baseURL: import.meta.env.VITE_API_URL, 
     withCredentials: true, 
     headers: {
         "Content-Type": "application/json",
