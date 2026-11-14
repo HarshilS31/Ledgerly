@@ -48,7 +48,7 @@ export const registerUser = async (req: Request,res: Response): Promise<Response
         expiresIn: "7d"
       }
     )
-    res.cookie("token",token,cookieOptions)
+    res.cookie("token", token, cookieOptions)
     return res.status(201).json({
       success: true,
       message: "User registered successfully.",
@@ -108,11 +108,7 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 }
 export const logoutUser = (req: Request, res: Response) => {
-    res.clearCookie("token", {
-        httpOnly: true,
-        secure: false,
-        sameSite: "strict"
-    });
+    res.clearCookie("token", cookieOptions);
     return res.status(200).json({ message: "Logout successful" });
 }
 export const changePassword = async (req: Request, res: Response) => {
