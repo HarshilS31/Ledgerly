@@ -60,7 +60,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 export async function generateAndMapTasks( rawText: string, userId: mongoose.Types.ObjectId, noteId: mongoose.Types.ObjectId) {
   try {
     const response = await ai.models.generateContent({
-      model: "models/gemini-4-hydrogen",
+      model: "gemini-3.6-flash",
       contents: `Extract action items from this text: "${rawText}"`,
           config: {
             systemInstruction: systemPrompt,
